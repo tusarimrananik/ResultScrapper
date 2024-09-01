@@ -49,16 +49,51 @@ const puppeteer = require('puppeteer');
 
     await page.click('#button2');
 
+    await page.waitForNavigation();
 
-    // Submit the form
-    // await page.click('button[type="submit"]');
 
-    // // Wait for navigation or any other indication that the form was submitted
-    // await page.waitForNavigation();
 
-    // // Take a screenshot of the result page (optional)
-    // await page.screenshot({ path: 'result.png' });
 
-    // Close the browser
-    // await browser.close();
+    const information = await page.evaluate(() => {
+        function extractInfo() {
+            const info = {};
+            // Function to find the next sibling <td> with text content
+            function getNextTdTextContent(td) {
+                let nextTd = td.nextElementSibling;
+                while (nextTd && nextTd.tagName !== 'TD') {
+                    nextTd = nextTd.nextElementSibling;
+                }
+                return nextTd ? nextTd.innerText.trim() : '';
+            }
+            // Helper function to find <td> by text content
+            function findTdByText(text) {
+                const tds = document.querySelectorAll('td');
+                for (let td of tds) {
+                    if (td.innerText.trim() === text) {
+                        return td;
+                    }
+                }
+                return null;
+            }
+            // Extract information based on known text label
+            info.result = getNextTdTextContent(findTdByText('Result'));
+            info.institute = getNextTdTextContent(findTdByText('Institute'));
+            info.gpa = getNextTdTextContent(findTdByText('GPA'));
+            return info;
+        }
+
+        // Example usage
+        return extractInfo();
+    });
+
+
+    console.log(information)
+
+
+
+
+
+
+
+
 })();
